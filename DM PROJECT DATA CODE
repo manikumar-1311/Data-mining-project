@@ -1,0 +1,704 @@
+-- Creating Dimension Tables
+CREATE TABLE Movie_Dim (
+    MovieID INT PRIMARY KEY,
+    Title NVARCHAR(255),
+    Runtime INT,
+    Language NVARCHAR(50),
+    CensorRating NVARCHAR(10),
+    IsFranchise CHAR(1) CHECK (IsFranchise IN ('Y', 'N')),
+    SequelNumber INT
+);
+
+CREATE TABLE Date_Dim (
+    DateID INT PRIMARY KEY,
+    FullDate DATE,
+    Day INT,
+    Month INT,
+    Year INT,
+    Quarter INT,
+    Season NVARCHAR(50)
+);
+
+CREATE TABLE Distributor_Dim (
+    DistributorID INT PRIMARY KEY,
+    DistributorName NVARCHAR(255),
+    RegionCoverage NVARCHAR(255),
+    EstYear INT
+);
+
+-- Creating Normalized Dimension Table
+CREATE TABLE ArtistSuccess_Dim (
+    ArtistSuccess_Id INT PRIMARY KEY,
+    TotalMovies INT,
+    AverageBoxOffice DECIMAL(18,2),
+    OTTPopularityScore DECIMAL(10,2),
+    StarPowerIndex DECIMAL(10,2)
+);
+
+CREATE TABLE Artist_Dim (
+    ArtistID INT PRIMARY KEY,
+    Name NVARCHAR(255),
+    DebutYear INT,
+    Gender CHAR(1) CHECK (Gender IN ('M', 'F', 'O')),
+    PrimaryProfession NVARCHAR(100),
+	ArtistSuccess_Id INT,
+	FOREIGN KEY (ArtistSuccess_Id) REFERENCES ArtistSuccess_Dim(ArtistSuccess_Id)
+);
+
+CREATE TABLE Platform_Dim (
+    PlatformID INT PRIMARY KEY,
+    PlatformName NVARCHAR(100),
+    SubscriptionBaseInMillions DECIMAL(10,2),
+    PrimaryRegion NVARCHAR(255)
+);
+
+
+-- Creating Fact Tables
+CREATE TABLE BoxOffice_Fact (
+	BoxOffice_Fact_Id INT,
+    MovieID INT,
+    ReleaseDateID INT,
+    DistributorID INT,
+    ArtistID INT,
+    ProductionCost DECIMAL(18,2),
+    MarketingCost DECIMAL(18,2),
+    TotalRevenue DECIMAL(18,2),
+    TheaterCount INT,
+    DaysInTheaters INT,
+    PRIMARY KEY (BoxOffice_Fact_Id,MovieID, ReleaseDateID, DistributorID, ArtistID),
+    FOREIGN KEY (MovieID) REFERENCES Movie_Dim(MovieID),
+    FOREIGN KEY (ReleaseDateID) REFERENCES Date_Dim(DateID),
+    FOREIGN KEY (DistributorID) REFERENCES Distributor_Dim(DistributorID),
+    FOREIGN KEY (ArtistID) REFERENCES Artist_Dim(ArtistID)
+);
+
+CREATE TABLE OTTPerformance_Fact (
+	OTTPerformance_Fact_Id INT,
+    MovieID INT,
+    OTTReleaseDateID INT,
+    PlatformID INT,
+    OTTViewership DECIMAL(18,2),
+    OTTRevenueShare DECIMAL(18,2),
+    DaysToOTTRelease INT,
+    PlatformExclusivityFee DECIMAL(18,2),
+    SocialMediaEngagementScore DECIMAL(10,2),
+    PRIMARY KEY (OTTPerformance_Fact_Id,MovieID, OTTReleaseDateID, PlatformID),
+    FOREIGN KEY (MovieID) REFERENCES Movie_Dim(MovieID),
+    FOREIGN KEY (OTTReleaseDateID) REFERENCES Date_Dim(DateID),
+    FOREIGN KEY (PlatformID) REFERENCES Platform_Dim(PlatformID)
+);
+
+--Inserting into Movie_Dim
+INSERT INTO Movie_Dim (MovieID, Title, Runtime, Language, CensorRating, IsFranchise, SequelNumber) VALUES
+-- 2014 Releases (10)
+(1, 'Manam', 165, 'Telugu', 'U', 'N', NULL),
+(2, 'Race Gurram', 170, 'Telugu', 'U', 'N', NULL),
+(3, 'Aagadu', 158, 'Telugu', 'U', 'N', NULL),
+(4, 'Govindudu Andarivadele', 162, 'Telugu', 'U', 'N', NULL),
+(5, 'Loukyam', 150, 'Telugu', 'U', 'N', NULL),
+(6, 'Pilla Nuvvu Leni Jeevitham', 145, 'Telugu', 'U', 'N', NULL),
+(7, 'Power', 155, 'Telugu', 'UA', 'N', NULL),
+(8, 'Yevadu', 160, 'Telugu', 'UA', 'N', NULL),
+(9, '1: Nenokkadine', 165, 'Telugu', 'UA', 'N', NULL),
+(10, 'Legend', 158, 'Telugu', 'UA', 'N', NULL),
+
+-- 2015 Releases (10)
+(11, 'Baahubali: The Beginning', 159, 'Telugu', 'UA', 'Y', 1),
+(12, 'Srimanthudu', 158, 'Telugu', 'U', 'N', NULL),
+(13, 'Temper', 155, 'Telugu', 'UA', 'N', NULL),
+(14, 'S/O Satyamurthy', 162, 'Telugu', 'U', 'N', NULL),
+(15, 'Kanche', 150, 'Telugu', 'U', 'N', NULL),
+(16, 'Bhale Bhale Magadivoy', 145, 'Telugu', 'U', 'N', NULL),
+(17, 'Size Zero', 148, 'Telugu', 'U', 'N', NULL),
+(18, 'Kick 2', 152, 'Telugu', 'UA', 'Y', 2),
+(19, 'Dohchay', 154, 'Telugu', 'UA', 'N', NULL),
+(20, 'Soukhyam', 140, 'Telugu', 'U', 'N', NULL),
+
+-- 2016 Releases (10)
+(21, 'Janatha Garage', 165, 'Telugu', 'UA', 'N', NULL),
+(22, 'Sarrainodu', 170, 'Telugu', 'UA', 'N', NULL),
+(23, 'A.. Aa', 158, 'Telugu', 'U', 'N', NULL),
+(24, 'Nannaku Prematho', 162, 'Telugu', 'U', 'N', NULL),
+(25, 'Oopiri', 150, 'Telugu', 'U', 'N', NULL),
+(26, 'Sardaar Gabbar Singh', 145, 'Telugu', 'UA', 'Y', 2),
+(27, 'Supreme', 155, 'Telugu', 'UA', 'N', NULL),
+(28, 'Rarandoi Veduka Chudham', 160, 'Telugu', 'U', 'N', NULL),
+(29, 'Brahmotsavam', 165, 'Telugu', 'U', 'N', NULL),
+(30, 'Krishnashtami', 158, 'Telugu', 'U', 'N', NULL),
+
+-- 2017 Releases (10)
+(31, 'Baahubali 2: The Conclusion', 167, 'Telugu', 'UA', 'Y', 2),
+(32, 'Arjun Reddy', 182, 'Telugu', 'A', 'N', NULL),
+(33, 'Bharat Ane Nenu', 173, 'Telugu', 'U', 'N', NULL),
+(34, 'Rangasthalam', 170, 'Telugu', 'UA', 'N', NULL),
+(35, 'Spyder', 158, 'Telugu', 'UA', 'N', NULL),
+(36, 'Jai Lava Kusa', 162, 'Telugu', 'UA', 'N', NULL),
+(37, 'Fidaa', 150, 'Telugu', 'U', 'N', NULL),
+(38, 'Mahanubhavudu', 145, 'Telugu', 'U', 'N', NULL),
+(39, 'DJ: Duvvada Jagannadham', 155, 'Telugu', 'UA', 'N', NULL),
+(40, 'Nene Raju Nene Mantri', 160, 'Telugu', 'UA', 'N', NULL),
+
+-- 2018 Releases (10)
+(41, 'Rangasthalam', 170, 'Telugu', 'UA', 'N', NULL),
+(42, 'Bharat Ane Nenu', 173, 'Telugu', 'U', 'N', NULL),
+(43, 'Mahanati', 177, 'Telugu', 'U', 'N', NULL),
+(44, 'Geetha Govindam', 150, 'Telugu', 'U', 'N', NULL),
+(45, 'Aravinda Sametha Veera Raghava', 165, 'Telugu', 'UA', 'N', NULL),
+(46, 'Naa Peru Surya Naa Illu India', 158, 'Telugu', 'UA', 'N', NULL),
+(47, 'Tholi Prema', 145, 'Telugu', 'U', 'N', NULL),
+(48, 'Chalo', 152, 'Telugu', 'U', 'N', NULL),
+(49, 'Savyasachi', 154, 'Telugu', 'UA', 'N', NULL),
+(50, 'Goodachari', 140, 'Telugu', 'UA', 'N', NULL),
+
+-- 2019 Releases (10)
+(51, 'Maharshi', 175, 'Telugu', 'U', 'N', NULL),
+(52, 'Sarileru Neekevvaru', 170, 'Telugu', 'U', 'N', NULL),
+(53, 'Majili', 151, 'Telugu', 'UA', 'N', NULL),
+(54, 'F2: Fun and Frustration', 152, 'Telugu', 'U', 'Y', 2),
+(55, 'iSmart Shankar', 158, 'Telugu', 'UA', 'N', NULL),
+(56, 'Gaddalakonda Ganesh', 162, 'Telugu', 'UA', 'N', NULL),
+(57, 'Dear Comrade', 150, 'Telugu', 'UA', 'N', NULL),
+(58, 'Sye Raa Narasimha Reddy', 172, 'Telugu', 'UA', 'N', NULL),
+(59, 'Saaho', 170, 'Telugu', 'UA', 'N', NULL),
+(60, 'Evaru', 145, 'Telugu', 'UA', 'N', NULL),
+
+-- 2020 Releases (10)
+(61, 'Ala Vaikunthapurramuloo', 161, 'Telugu', 'U', 'N', NULL),
+(62, 'Bheeshma', 155, 'Telugu', 'U', 'N', NULL),
+(63, 'Sarileru Neekevvaru', 170, 'Telugu', 'U', 'N', NULL),
+(64, 'Disco Raja', 158, 'Telugu', 'UA', 'N', NULL),
+(65, 'World Famous Lover', 162, 'Telugu', 'UA', 'N', NULL),
+(66, 'V', 150, 'Telugu', 'UA', 'N', NULL),
+(67, 'Colour Photo', 145, 'Telugu', 'U', 'N', NULL),
+(68, 'Palasa 1978', 155, 'Telugu', 'UA', 'N', NULL),
+(69, 'Jersey', 157, 'Telugu', 'U', 'N', NULL),
+(70, 'Uppena', 151, 'Telugu', 'UA', 'N', NULL),
+
+-- 2021 Releases (10)
+(71, 'Pushpa: The Rise', 179, 'Telugu', 'UA', 'Y', 1),
+(72, 'Shyam Singha Roy', 165, 'Telugu', 'UA', 'N', NULL),
+(73, 'Most Eligible Bachelor', 158, 'Telugu', 'U', 'N', NULL),
+(74, 'Love Story', 162, 'Telugu', 'UA', 'N', NULL),
+(75, 'Jathi Ratnalu', 150, 'Telugu', 'U', 'N', NULL),
+(76, 'Krack', 145, 'Telugu', 'UA', 'N', NULL),
+(77, 'Vakeel Saab', 165, 'Telugu', 'UA', 'N', NULL),
+(78, 'Narappa', 155, 'Telugu', 'UA', 'N', NULL),
+(79, 'Drushyam 2', 160, 'Telugu', 'U', 'Y', 2),
+(80, 'Solo Brathuke So Better', 158, 'Telugu', 'U', 'N', NULL),
+
+-- 2022 Releases (10)
+(81, 'RRR', 182, 'Telugu', 'UA', 'N', NULL),
+(82, 'Bheemla Nayak', 156, 'Telugu', 'UA', 'N', NULL),
+(83, 'Sarkaru Vaari Paata', 162, 'Telugu', 'UA', 'N', NULL),
+(84, 'Radhe Shyam', 170, 'Telugu', 'UA', 'N', NULL),
+(85, 'Acharya', 158, 'Telugu', 'UA', 'N', NULL),
+(86, 'F3: Fun and Frustration', 152, 'Telugu', 'U', 'Y', 3),
+(87, 'Major', 165, 'Telugu', 'U', 'N', NULL),
+(88, 'Ante Sundaraniki', 150, 'Telugu', 'U', 'N', NULL),
+(89, 'Sita Ramam', 158, 'Telugu', 'U', 'N', NULL),
+(90, 'Liger', 162, 'Telugu', 'UA', 'N', NULL),
+
+-- 2023 Releases (10)
+(91, 'Waltair Veerayya', 165, 'Telugu', 'UA', 'N', NULL),
+(92, 'Veera Simha Reddy', 170, 'Telugu', 'UA', 'N', NULL),
+(93, 'Dasara', 158, 'Telugu', 'UA', 'N', NULL),
+(94, 'Virupaksha', 162, 'Telugu', 'UA', 'N', NULL),
+(95, 'Meter', 150, 'Telugu', 'UA', 'N', NULL),
+(96, 'Baby', 145, 'Telugu', 'UA', 'N', NULL),
+(97, 'Bro', 155, 'Telugu', 'UA', 'N', NULL),
+(98, 'Mangalavaaram', 160, 'Telugu', 'UA', 'N', NULL),
+(99, 'Hi Nanna', 165, 'Telugu', 'U', 'N', NULL),
+(100, 'Salaar: Part 1 - Ceasefire', 158, 'Telugu', 'UA', 'Y', 1),
+
+-- 2024 Releases (4)
+(101, 'Kalki 2898 AD', 180, 'Telugu', 'UA', 'N', NULL),
+(102, 'Pushpa 2: The Rule', 175, 'Telugu', 'UA', 'Y', 2),
+(103, 'Game Changer', 170, 'Telugu', 'UA', 'N', NULL),
+(104, 'Devara: Part 1', 165, 'Telugu', 'UA', 'Y', 1);
+
+
+--Insering into Date Dim
+INSERT INTO Date_Dim (DateID, FullDate, Day, Month, Year, Quarter, Season) VALUES
+-- 2014 Release Dates (10)
+(1, '2014-05-23', 23, 5, 2014, 2, 'Summer'),
+(2, '2014-04-11', 11, 4, 2014, 2, 'Spring'),
+(3, '2014-09-19', 19, 9, 2014, 3, 'Autumn'),
+(4, '2014-10-01', 1, 10, 2014, 4, 'Autumn'),
+(5, '2014-11-21', 21, 11, 2014, 4, 'Autumn'),
+(6, '2014-08-29', 29, 8, 2014, 3, 'Summer'),
+(7, '2014-02-28', 28, 2, 2014, 1, 'Winter'),
+(8, '2014-01-12', 12, 1, 2014, 1, 'Winter'),
+(9, '2014-01-10', 10, 1, 2014, 1, 'Winter'),
+(10, '2014-03-28', 28, 3, 2014, 1, 'Spring'),
+
+-- 2015 Release Dates (10)
+(11, '2015-07-10', 10, 7, 2015, 3, 'Summer'),
+(12, '2015-08-07', 7, 8, 2015, 3, 'Summer'),
+(13, '2015-02-13', 13, 2, 2015, 1, 'Winter'),
+(14, '2015-04-09', 9, 4, 2015, 2, 'Spring'),
+(15, '2015-10-22', 22, 10, 2015, 4, 'Autumn'),
+(16, '2015-08-21', 21, 8, 2015, 3, 'Summer'),
+(17, '2015-11-27', 27, 11, 2015, 4, 'Autumn'),
+(18, '2015-05-22', 22, 5, 2015, 2, 'Summer'),
+(19, '2015-04-24', 24, 4, 2015, 2, 'Spring'),
+(20, '2015-03-20', 20, 3, 2015, 1, 'Spring'),
+
+-- 2016 Release Dates (10)
+(21, '2016-09-01', 1, 9, 2016, 3, 'Autumn'),
+(22, '2016-04-22', 22, 4, 2016, 2, 'Spring'),
+(23, '2016-06-02', 2, 6, 2016, 2, 'Summer'),
+(24, '2016-01-13', 13, 1, 2016, 1, 'Winter'),
+(25, '2016-03-25', 25, 3, 2016, 1, 'Spring'),
+(26, '2016-04-08', 8, 4, 2016, 2, 'Spring'),
+(27, '2016-07-08', 8, 7, 2016, 3, 'Summer'),
+(28, '2016-05-27', 27, 5, 2016, 2, 'Summer'),
+(29, '2016-05-20', 20, 5, 2016, 2, 'Summer'),
+(30, '2016-01-29', 29, 1, 2016, 1, 'Winter'),
+
+-- 2017 Release Dates (10)
+(31, '2017-04-28', 28, 4, 2017, 2, 'Spring'),
+(32, '2017-08-25', 25, 8, 2017, 3, 'Summer'),
+(33, '2018-04-20', 20, 4, 2018, 2, 'Spring'),
+(34, '2018-03-30', 30, 3, 2018, 1, 'Spring'),
+(35, '2017-09-27', 27, 9, 2017, 3, 'Autumn'),
+(36, '2017-09-21', 21, 9, 2017, 3, 'Autumn'),
+(37, '2017-07-21', 21, 7, 2017, 3, 'Summer'),
+(38, '2017-09-15', 15, 9, 2017, 3, 'Autumn'),
+(39, '2017-06-23', 23, 6, 2017, 2, 'Summer'),
+(40, '2017-08-11', 11, 8, 2017, 3, 'Summer'),
+
+-- 2018 Release Dates (10)
+(41, '2018-03-30', 30, 3, 2018, 1, 'Spring'),
+(42, '2018-04-20', 20, 4, 2018, 2, 'Spring'),
+(43, '2018-05-09', 9, 5, 2018, 2, 'Spring'),
+(44, '2018-08-15', 15, 8, 2018, 3, 'Summer'),
+(45, '2018-10-11', 11, 10, 2018, 4, 'Autumn'),
+(46, '2018-05-18', 18, 5, 2018, 2, 'Spring'),
+(47, '2018-02-02', 2, 2, 2018, 1, 'Winter'),
+(48, '2018-03-02', 2, 3, 2018, 1, 'Spring'),
+(49, '2018-11-02', 2, 11, 2018, 4, 'Autumn'),
+(50, '2018-08-03', 3, 8, 2018, 3, 'Summer'),
+
+-- 2019 Release Dates (10)
+(51, '2019-05-09', 9, 5, 2019, 2, 'Spring'),
+(52, '2020-01-11', 11, 1, 2020, 1, 'Winter'),
+(53, '2019-04-05', 5, 4, 2019, 2, 'Spring'),
+(54, '2019-02-22', 22, 2, 2019, 1, 'Winter'),
+(55, '2019-07-19', 19, 7, 2019, 3, 'Summer'),
+(56, '2019-09-27', 27, 9, 2019, 3, 'Autumn'),
+(57, '2019-07-26', 26, 7, 2019, 3, 'Summer'),
+(58, '2019-10-02', 2, 10, 2019, 4, 'Autumn'),
+(59, '2019-08-30', 30, 8, 2019, 3, 'Summer'),
+(60, '2019-08-15', 15, 8, 2019, 3, 'Summer'),
+
+-- 2020 Release Dates (10)
+(61, '2020-01-12', 12, 1, 2020, 1, 'Winter'),
+(62, '2020-02-21', 21, 2, 2020, 1, 'Winter'),
+(63, '2020-01-11', 11, 1, 2020, 1, 'Winter'),
+(64, '2020-01-24', 24, 1, 2020, 1, 'Winter'),
+(65, '2020-02-14', 14, 2, 2020, 1, 'Winter'),
+(66, '2020-09-05', 5, 9, 2020, 3, 'Autumn'),
+(67, '2020-10-16', 16, 10, 2020, 4, 'Autumn'),
+(68, '2020-02-21', 21, 2, 2020, 1, 'Winter'),
+(69, '2021-04-30', 30, 4, 2021, 2, 'Spring'),
+(70, '2021-02-12', 12, 2, 2021, 1, 'Winter'),
+
+-- 2021 Release Dates (10)
+(71, '2021-12-17', 17, 12, 2021, 4, 'Winter'),
+(72, '2021-12-24', 24, 12, 2021, 4, 'Winter'),
+(73, '2021-10-15', 15, 10, 2021, 4, 'Autumn'),
+(74, '2021-09-24', 24, 9, 2021, 3, 'Autumn'),
+(75, '2021-03-05', 5, 3, 2021, 1, 'Spring'),
+(76, '2021-01-09', 9, 1, 2021, 1, 'Winter'),
+(77, '2021-04-09', 9, 4, 2021, 2, 'Spring'),
+(78, '2021-07-20', 20, 7, 2021, 3, 'Summer'),
+(79, '2021-02-25', 25, 2, 2021, 1, 'Winter'),
+(80, '2021-12-24', 24, 12, 2021, 4, 'Winter'),
+
+-- 2022 Release Dates (10)
+(81, '2022-03-25', 25, 3, 2022, 1, 'Spring'),
+(82, '2022-02-25', 25, 2, 2022, 1, 'Winter'),
+(83, '2022-02-11', 11, 2, 2022, 1, 'Winter'),
+(84, '2022-03-11', 11, 3, 2022, 1, 'Spring'),
+(85, '2022-04-29', 29, 4, 2022, 2, 'Spring'),
+(86, '2022-05-27', 27, 5, 2022, 2, 'Summer'),
+(87, '2022-06-03', 3, 6, 2022, 2, 'Summer'),
+(88, '2022-06-10', 10, 6, 2022, 2, 'Summer'),
+(89, '2022-08-05', 5, 8, 2022, 3, 'Summer'),
+(90, '2022-08-25', 25, 8, 2022, 3, 'Summer'),
+
+-- 2023 Release Dates (10)
+(91, '2023-01-13', 13, 1, 2023, 1, 'Winter'),
+(92, '2023-01-12', 12, 1, 2023, 1, 'Winter'),
+(93, '2023-03-30', 30, 3, 2023, 1, 'Spring'),
+(94, '2023-04-21', 21, 4, 2023, 2, 'Spring'),
+(95, '2023-05-19', 19, 5, 2023, 2, 'Summer'),
+(96, '2023-07-14', 14, 7, 2023, 3, 'Summer'),
+(97, '2023-07-28', 28, 7, 2023, 3, 'Summer'),
+(98, '2023-11-17', 17, 11, 2023, 4, 'Autumn'),
+(99, '2023-12-07', 7, 12, 2023, 4, 'Winter'),
+(100, '2023-12-22', 22, 12, 2023, 4, 'Winter'),
+
+-- 2024 Release Dates (4)
+(101, '2024-05-09', 9, 5, 2024, 2, 'Spring'),
+(102, '2024-08-15', 15, 8, 2024, 3, 'Summer'),
+(103, '2024-09-05', 5, 9, 2024, 3, 'Autumn'),
+(104, '2024-04-05', 5, 4, 2024, 2, 'Spring');
+
+
+-- Inserting into Distributors Dim
+INSERT INTO Distributor_Dim (DistributorID, DistributorName, RegionCoverage, EstYear) VALUES
+(1, 'Arka Media Works', 'Andhra Pradesh, Telangana', 2001),
+(2, 'DVV Entertainment', 'South India', 1995),
+(3, 'Geetha Arts', 'Pan-India', 1972),
+(4, 'Sri Venkateswara Creations', 'Andhra Pradesh, Telangana', 1999),
+(5, 'UV Creations', 'South India', 2010),
+(6, 'Mythri Movie Makers', 'Pan-India', 2015),
+(7, 'Haarika & Hassine Creations', 'Andhra Pradesh, Telangana', 2008),
+(8, 'Suresh Productions', 'South India', 1964),
+(9, 'Asian Cinemas', 'Pan-India', 2005),
+(10, 'Annapurna Studios', 'Andhra Pradesh, Telangana', 1975);
+
+
+--Inserting into ArtistSuccess_Dim 
+-- Corrected insertion into ArtistSuccess_Dim 
+INSERT INTO ArtistSuccess_Dim (ArtistSuccess_Id, TotalMovies, AverageBoxOffice, OTTPopularityScore, StarPowerIndex) VALUES
+(1, 20, 150.50, 9.2, 9.5),
+(2, 25, 80.25, 8.5, 8.0),
+(3, 28, 95.60, 9.3, 9.4),
+(4, 15, 120.30, 9.0, 9.2),
+(5, 22, 110.45, 9.1, 9.3),
+(6, 35, 85.90, 8.9, 9.1),
+(7, 40, 75.20, 8.7, 8.8),
+(8, 12, 65.30, 8.6, 8.5),
+(9, 20, 55.40, 8.4, 8.2),
+(10, 100, 60.30, 8.6, 8.7),
+(11, 150, 70.40, 8.8, 9.0),
+(12, 100, 65.50, 8.5, 8.6),
+(13, 25, 45.50, 8.9, 8.7),
+(14, 15, 50.60, 8.7, 8.5),
+(15, 18, 40.70, 8.5, 8.3),
+(16, 10, 35.80, 8.3, 8.1),
+(17, 20, 42.90, 8.4, 8.2),
+(18, 30, 70.75, 8.8, 8.5),
+(19, 50, 55.80, 8.6, 8.4),
+(20, 40, 60.90, 8.7, 8.5),
+(21, 12, 200.00, 9.5, 9.8),
+(22, 15, 90.50, 8.8, 8.9),
+(23, 10, 85.25, 8.7, 8.8),
+(24, 8, 70.75, 8.5, 8.6),
+(25, 30, 60.30, 8.4, 8.5),
+(26, 100, 60.30, 8.6, 8.7),
+(27, 80, 55.40, 8.5, 8.6),
+(28, 50, 65.50, 8.7, 8.8),
+(29, 70, 70.60, 8.8, 8.9),
+(30, 40, 45.70, 8.3, 8.4);
+
+--Inserting into Artist Dim
+INSERT INTO Artist_Dim (ArtistID, Name, DebutYear, Gender, PrimaryProfession) VALUES
+(1, 'Prabhas', 2002, 'M', 'Actor'),
+(2, 'Rana Daggubati', 2004, 'M', 'Actor'),
+(3, 'Allu Arjun', 2003, 'M', 'Actor'),
+(4, 'Ram Charan', 2007, 'M', 'Actor'),
+(5, 'Jr NTR', 2001, 'M', 'Actor'),
+(6, 'Mahesh Babu', 1999, 'M', 'Actor'),
+(7, 'Pawan Kalyan', 1996, 'M', 'Actor'),
+(8, 'Vijay Deverakonda', 2011, 'M', 'Actor'),
+(9, 'Nani', 2008, 'M', 'Actor'),
+(10, 'Nagarjuna', 1986, 'M', 'Actor'),
+(11, 'Chiranjeevi', 1978, 'M', 'Actor'),
+(12, 'Balakrishna', 1974, 'M', 'Actor'),
+(13, 'Samantha', 2010, 'F', 'Actress'),
+(14, 'Rashmika Mandanna', 2016, 'F', 'Actress'),
+(15, 'Keerthy Suresh', 2013, 'F', 'Actress'),
+(16, 'Sai Pallavi', 2015, 'F', 'Actress'),
+(17, 'Pooja Hegde', 2012, 'F', 'Actress'),
+(18, 'Anushka Shetty', 2005, 'F', 'Actress'),
+(19, 'Kajal Aggarwal', 2004, 'F', 'Actress'),
+(20, 'Tamannaah Bhatia', 2005, 'F', 'Actress'),
+(21, 'Rajamouli', 2001, 'M', 'Director'),
+(22, 'Trivikram Srinivas', 1995, 'M', 'Director'),
+(23, 'Sukumar', 2004, 'M', 'Director'),
+(24, 'Koratala Siva', 2014, 'M', 'Director'),
+(25, 'Puri Jagannadh', 2000, 'M', 'Director'),
+(26, 'DSP', 1994, 'M', 'Music Director'),
+(27, 'Thaman S', 2005, 'M', 'Music Director'),
+(28, 'Anirudh Ravichander', 2012, 'M', 'Music Director'),
+(29, 'Devi Sri Prasad', 1998, 'M', 'Music Director'),
+(30, 'Mickey J Meyer', 2004, 'M', 'Music Director');
+
+
+--Inserting into Platform_Dim 
+INSERT INTO Platform_Dim (PlatformID, PlatformName, SubscriptionBaseInMillions, PrimaryRegion) VALUES
+(1, 'Amazon Prime Video', 15.5, 'Global'),
+(2, 'Netflix', 20.2, 'Global'),
+(3, 'Disney+ Hotstar', 45.0, 'India'),
+(4, 'ZEE5', 8.3, 'India');
+
+
+-- Inserting into BoxOffice_Fact 
+INSERT INTO BoxOffice_Fact (BoxOffice_Fact_Id, MovieID, ReleaseDateID, DistributorID, ArtistID, ProductionCost, MarketingCost, TotalRevenue, TheaterCount, DaysInTheaters) VALUES
+-- 2014 Movies (10)
+(1, 1, 1, 1, 1, 25.0, 10.0, 75.0, 1500, 100),
+(2, 2, 2, 2, 2, 30.0, 12.0, 120.0, 1800, 120),
+(3, 3, 3, 3, 3, 35.0, 15.0, 80.0, 2000, 90),
+(4, 4, 4, 4, 4, 20.0, 8.0, 60.0, 1600, 85),
+(5, 5, 5, 5, 5, 15.0, 7.0, 50.0, 1400, 80),
+(6, 6, 6, 6, 6, 10.0, 5.0, 30.0, 1200, 70),
+(7, 7, 7, 7, 7, 25.0, 10.0, 70.0, 1500, 95),
+(8, 8, 8, 8, 8, 20.0, 8.0, 65.0, 1600, 85),
+(9, 9, 9, 9, 9, 40.0, 15.0, 45.0, 1800, 75),
+(10, 10, 10, 10, 10, 30.0, 12.0, 90.0, 1700, 110),
+
+-- 2015 Movies (10)
+(11, 11, 11, 1, 1, 120.0, 30.0, 650.0, 4000, 150),
+(12, 12, 12, 2, 2, 40.0, 12.0, 150.0, 3000, 90),
+(13, 13, 13, 3, 3, 25.0, 10.0, 80.0, 2000, 85),
+(14, 14, 14, 4, 4, 45.0, 18.0, 200.0, 3200, 95),
+(15, 15, 15, 5, 5, 15.0, 8.0, 60.0, 2500, 90),
+(16, 16, 16, 6, 6, 12.0, 6.0, 45.0, 2200, 80),
+(17, 17, 17, 7, 7, 10.0, 5.0, 30.0, 2000, 75),
+(18, 18, 18, 8, 8, 25.0, 10.0, 120.0, 3000, 90),
+(19, 19, 19, 9, 9, 10.0, 5.0, 40.0, 2000, 75),
+(20, 20, 20, 10, 10, 8.0, 4.0, 25.0, 1800, 70),
+
+-- 2016 Movies (10)
+(21, 21, 21, 1, 1, 50.0, 15.0, 180.0, 3500, 100),
+(22, 22, 22, 2, 2, 45.0, 18.0, 200.0, 3200, 95),
+(23, 23, 23, 3, 3, 30.0, 10.0, 150.0, 3000, 90),
+(24, 24, 24, 4, 4, 35.0, 12.0, 180.0, 3500, 95),
+(25, 25, 25, 5, 5, 20.0, 8.0, 100.0, 2800, 85),
+(26, 26, 26, 6, 6, 30.0, 10.0, 120.0, 3000, 100),
+(27, 27, 27, 7, 7, 25.0, 10.0, 90.0, 2800, 85),
+(28, 28, 28, 8, 8, 30.0, 12.0, 150.0, 3500, 95),
+(29, 29, 29, 9, 9, 40.0, 15.0, 80.0, 3000, 80),
+(30, 30, 30, 10, 10, 20.0, 8.0, 60.0, 2500, 85),
+
+-- 2017 Movies (10)
+(31, 31, 31, 1, 1, 150.0, 40.0, 1800.0, 6500, 200),
+(32, 32, 32, 2, 2, 10.0, 5.0, 50.0, 2000, 80),
+(33, 33, 33, 3, 3, 45.0, 18.0, 200.0, 3200, 95),
+(34, 34, 34, 4, 4, 40.0, 15.0, 250.0, 4000, 110),
+(35, 35, 35, 5, 5, 50.0, 20.0, 120.0, 3500, 90),
+(36, 36, 36, 6, 6, 35.0, 12.0, 180.0, 3500, 95),
+(37, 37, 37, 7, 7, 15.0, 8.0, 60.0, 2500, 90),
+(38, 38, 38, 8, 8, 12.0, 6.0, 45.0, 2200, 80),
+(39, 39, 39, 9, 9, 30.0, 12.0, 150.0, 3500, 95),
+(40, 40, 40, 10, 10, 25.0, 10.0, 120.0, 3000, 90),
+
+-- 2018 Movies (10)
+(41, 41, 41, 1, 1, 40.0, 15.0, 250.0, 4000, 110),
+(42, 42, 42, 2, 2, 45.0, 18.0, 200.0, 3200, 95),
+(43, 43, 43, 3, 3, 15.0, 8.0, 60.0, 2500, 90),
+(44, 44, 44, 4, 4, 12.0, 6.0, 45.0, 2200, 80),
+(45, 45, 45, 5, 5, 50.0, 20.0, 180.0, 3500, 100),
+(46, 46, 46, 6, 6, 30.0, 12.0, 90.0, 2800, 85),
+(47, 47, 47, 7, 7, 15.0, 8.0, 60.0, 2500, 90),
+(48, 48, 48, 8, 8, 12.0, 6.0, 45.0, 2200, 80),
+(49, 49, 49, 9, 9, 35.0, 12.0, 180.0, 3500, 95),
+(50, 50, 50, 10, 10, 20.0, 8.0, 100.0, 2800, 85),
+
+-- 2019 Movies (10)
+(51, 51, 51, 1, 1, 30.0, 10.0, 150.0, 3000, 90),
+(52, 52, 52, 2, 2, 35.0, 12.0, 180.0, 3500, 95),
+(53, 53, 53, 3, 3, 15.0, 8.0, 60.0, 2500, 90),
+(54, 54, 54, 4, 4, 20.0, 8.0, 100.0, 2800, 85),
+(55, 55, 55, 5, 5, 25.0, 10.0, 120.0, 3000, 90),
+(56, 56, 56, 6, 6, 30.0, 10.0, 150.0, 3000, 90),
+(57, 57, 57, 7, 7, 15.0, 8.0, 60.0, 2500, 90),
+(58, 58, 58, 8, 8, 80.0, 20.0, 240.0, 4000, 110),
+(59, 59, 59, 9, 9, 70.0, 25.0, 350.0, 4500, 120),
+(60, 60, 60, 10, 10, 15.0, 8.0, 60.0, 2500, 90),
+
+-- 2020 Movies (10)
+(61, 61, 61, 1, 1, 50.0, 15.0, 260.0, 3500, 100),
+(62, 62, 62, 2, 2, 12.0, 6.0, 45.0, 2200, 80),
+(63, 63, 63, 3, 3, 35.0, 12.0, 180.0, 3500, 95),
+(64, 64, 64, 4, 4, 25.0, 10.0, 90.0, 2800, 85),
+(65, 65, 65, 5, 5, 20.0, 8.0, 65.0, 2500, 80),
+(66, 66, 66, 6, 6, 30.0, 10.0, 150.0, 3000, 90),
+(67, 67, 67, 7, 7, 8.0, 4.0, 25.0, 1800, 70),
+(68, 68, 68, 8, 8, 25.0, 10.0, 120.0, 3000, 90),
+(69, 69, 69, 9, 9, 12.0, 6.0, 45.0, 2200, 80),
+(70, 70, 70, 10, 10, 10.0, 5.0, 40.0, 2000, 75),
+
+-- 2021 Movies (10)
+(71, 71, 71, 1, 1, 100.0, 25.0, 350.0, 5000, 120),
+(72, 72, 72, 2, 2, 40.0, 15.0, 180.0, 3500, 100),
+(73, 73, 73, 3, 3, 25.0, 10.0, 120.0, 3000, 90),
+(74, 74, 74, 4, 4, 20.0, 8.0, 100.0, 2800, 85),
+(75, 75, 75, 5, 5, 15.0, 8.0, 60.0, 2500, 90),
+(76, 76, 76, 6, 6, 30.0, 12.0, 150.0, 3500, 95),
+(77, 77, 77, 7, 7, 30.0, 12.0, 150.0, 3500, 95),
+(78, 78, 78, 8, 8, 25.0, 10.0, 120.0, 3000, 90),
+(79, 79, 79, 9, 9, 20.0, 8.0, 100.0, 2800, 85),
+(80, 80, 80, 10, 10, 15.0, 8.0, 60.0, 2500, 90),
+
+-- 2022 Movies (10)
+(81, 81, 81, 1, 1, 300.0, 50.0, 1200.0, 8000, 180),
+(82, 82, 82, 2, 2, 40.0, 15.0, 180.0, 3500, 100),
+(83, 83, 83, 3, 3, 45.0, 18.0, 200.0, 3200, 95),
+(84, 84, 84, 4, 4, 150.0, 30.0, 400.0, 5000, 120),
+(85, 85, 85, 5, 5, 80.0, 20.0, 180.0, 3500, 100),
+(86, 86, 86, 6, 6, 25.0, 10.0, 120.0, 3000, 90),
+(87, 87, 87, 7, 7, 30.0, 12.0, 150.0, 3500, 95),
+(88, 88, 88, 8, 8, 20.0, 8.0, 100.0, 2800, 85),
+(89, 89, 89, 9, 9, 25.0, 10.0, 120.0, 3000, 90),
+(90, 90, 90, 10, 10, 100.0, 25.0, 250.0, 4500, 110),
+
+-- 2023 Movies (10)
+(91, 91, 91, 1, 1, 60.0, 20.0, 200.0, 4000, 110),
+(92, 92, 92, 2, 2, 50.0, 15.0, 180.0, 3500, 100),
+(93, 93, 93, 3, 3, 40.0, 15.0, 180.0, 3500, 100),
+(94, 94, 94, 4, 4, 25.0, 10.0, 120.0, 3000, 90),
+(95, 95, 95, 5, 5, 30.0, 12.0, 150.0, 3500, 95),
+(96, 96, 96, 6, 6, 15.0, 8.0, 60.0, 2500, 90),
+(97, 97, 97, 7, 7, 25.0, 10.0, 120.0, 3000, 90),
+(98, 98, 98, 8, 8, 20.0, 8.0, 100.0, 2800, 85),
+(99, 99, 99, 9, 9, 30.0, 12.0, 150.0, 3500, 95),
+(100, 100, 100, 10, 10, 200.0, 40.0, 600.0, 7000, 150),
+
+-- 2024 Movies (4)
+(101, 101, 101, 1, 1, 250.0, 50.0, 800.0, 7500, 180),
+(102, 102, 102, 2, 2, 150.0, 30.0, 500.0, 6000, 150),
+(103, 103, 103, 3, 3, 100.0, 25.0, 400.0, 5500, 130),
+(104, 104, 104, 4, 4, 120.0, 30.0, 450.0, 5800, 140);
+
+
+--Insering into OTTPerformance_Fact 
+INSERT INTO OTTPerformance_Fact (OTTPerformance_Fact_Id, MovieID, OTTReleaseDateID, PlatformID, OTTViewership, OTTRevenueShare, DaysToOTTRelease, PlatformExclusivityFee, SocialMediaEngagementScore) VALUES
+-- 2014 Movies (10)
+(1, 1, 1, 1, 15.0, 8.0, 60, 5.0, 8.4),
+(2, 2, 2, 2, 18.0, 10.0, 45, 6.0, 8.5),
+(3, 3, 3, 3, 12.0, 7.0, 90, 4.0, 8.2),
+(4, 4, 4, 4, 10.0, 6.0, 75, 3.5, 8.1),
+(5, 5, 5, 1, 8.0, 5.0, 60, 3.0, 8.0),
+(6, 6, 6, 2, 6.0, 4.0, 90, 2.5, 7.9),
+(7, 7, 7, 3, 15.0, 8.0, 60, 5.0, 8.4),
+(8, 8, 8, 4, 20.0, 11.0, 45, 6.5, 8.6),
+(9, 9, 9, 1, 10.0, 6.0, 90, 4.0, 8.2),
+(10, 10, 10, 2, 12.0, 7.0, 75, 4.5, 8.3),
+
+-- 2015 Movies (10)
+(11, 11, 11, 3, 25.5, 15.0, 45, 10.0, 9.2),
+(12, 12, 12, 4, 18.0, 10.0, 60, 6.0, 8.5),
+(13, 13, 13, 1, 15.0, 8.0, 75, 5.0, 8.4),
+(14, 14, 14, 2, 20.0, 11.0, 60, 6.5, 8.6),
+(15, 15, 15, 3, 12.0, 7.0, 90, 4.0, 8.2),
+(16, 16, 16, 4, 22.0, 12.0, 45, 7.5, 8.7),
+(17, 17, 17, 1, 10.0, 6.0, 90, 4.0, 8.2),
+(18, 18, 18, 2, 18.0, 10.0, 60, 6.0, 8.5),
+(19, 19, 19, 3, 15.0, 8.0, 75, 5.0, 8.4),
+(20, 20, 20, 4, 8.0, 5.0, 90, 3.0, 8.0),
+
+-- 2016 Movies (10)
+(21, 21, 21, 1, 20.0, 11.0, 60, 6.5, 8.6),
+(22, 22, 22, 2, 22.0, 12.0, 45, 7.5, 8.7),
+(23, 23, 23, 3, 25.0, 14.0, 30, 8.0, 8.8),
+(24, 24, 24, 4, 18.0, 10.0, 60, 6.0, 8.5),
+(25, 25, 25, 1, 20.0, 11.0, 45, 6.5, 8.6),
+(26, 26, 26, 2, 15.0, 8.0, 75, 5.0, 8.4),
+(27, 27, 27, 3, 18.0, 10.0, 60, 6.0, 8.5),
+(28, 28, 28, 4, 22.0, 12.0, 45, 7.5, 8.7),
+(29, 29, 29, 1, 15.0, 8.0, 75, 5.0, 8.4),
+(30, 30, 30, 2, 12.0, 7.0, 90, 4.0, 8.2),
+
+-- 2017 Movies (10)
+(31, 31, 31, 3, 35.0, 20.0, 60, 15.0, 9.5),
+(32, 32, 32, 4, 15.0, 8.0, 90, 5.0, 8.4),
+(33, 33, 33, 1, 20.0, 11.0, 60, 6.5, 8.6),
+(34, 34, 34, 2, 28.0, 16.0, 45, 9.0, 8.9),
+(35, 35, 35, 3, 18.0, 10.0, 75, 6.0, 8.5),
+(36, 36, 36, 4, 22.0, 12.0, 60, 7.5, 8.7),
+(37, 37, 37, 1, 15.0, 8.0, 90, 5.0, 8.4),
+(38, 38, 38, 2, 18.0, 10.0, 75, 6.0, 8.5),
+(39, 39, 39, 3, 20.0, 11.0, 60, 6.5, 8.6),
+(40, 40, 40, 4, 15.0, 8.0, 90, 5.0, 8.4),
+
+-- 2018 Movies (10)
+(41, 41, 41, 1, 28.0, 16.0, 45, 9.0, 8.9),
+(42, 42, 42, 2, 20.0, 11.0, 60, 6.5, 8.6),
+(43, 43, 43, 3, 22.0, 12.0, 60, 7.5, 8.7),
+(44, 44, 44, 4, 30.0, 18.0, 30, 10.0, 9.0),
+(45, 45, 45, 1, 20.0, 11.0, 60, 6.5, 8.6),
+(46, 46, 46, 2, 18.0, 10.0, 75, 6.0, 8.5),
+(47, 47, 47, 3, 15.0, 8.0, 90, 5.0, 8.4),
+(48, 48, 48, 4, 20.0, 11.0, 60, 6.5, 8.6),
+(49, 49, 49, 1, 18.0, 10.0, 75, 6.0, 8.5),
+(50, 50, 50, 2, 15.0, 8.0, 90, 5.0, 8.4),
+
+-- 2019 Movies (10)
+(51, 51, 51, 3, 20.0, 11.0, 60, 6.5, 8.6),
+(52, 52, 52, 4, 22.0, 12.0, 45, 7.5, 8.7),
+(53, 53, 53, 1, 18.0, 10.0, 75, 6.0, 8.5),
+(54, 54, 54, 2, 30.0, 18.0, 30, 10.0, 9.0),
+(55, 55, 55, 3, 20.0, 11.0, 60, 6.5, 8.6),
+(56, 56, 56, 4, 18.0, 10.0, 75, 6.0, 8.5),
+(57, 57, 57, 1, 15.0, 8.0, 90, 5.0, 8.4),
+(58, 58, 58, 2, 25.0, 14.0, 60, 8.0, 8.8),
+(59, 59, 59, 3, 30.0, 18.0, 45, 10.0, 9.0),
+(60, 60, 60, 4, 15.0, 8.0, 90, 5.0, 8.4),
+
+-- 2020 Movies (10)
+(61, 61, 61, 1, 22.0, 12.0, 45, 7.5, 8.7),
+(62, 62, 62, 2, 18.0, 10.0, 75, 6.0, 8.5),
+(63, 63, 63, 3, 30.0, 18.0, 30, 10.0, 9.0),
+(64, 64, 64, 4, 20.0, 11.0, 60, 6.5, 8.6),
+(65, 65, 65, 1, 15.0, 8.0, 90, 5.0, 8.4),
+(66, 66, 66, 2, 18.0, 10.0, 75, 6.0, 8.5),
+(67, 67, 67, 3, 12.0, 7.0, 90, 4.0, 8.2),
+(68, 68, 68, 4, 15.0, 8.0, 90, 5.0, 8.4),
+(69, 69, 69, 1, 18.0, 10.0, 75, 6.0, 8.5),
+(70, 70, 70, 2, 15.0, 8.0, 90, 5.0, 8.4),
+
+-- 2021 Movies (10)
+(71, 71, 71, 3, 30.0, 18.0, 45, 12.0, 9.3),
+(72, 72, 72, 4, 25.0, 14.0, 60, 8.0, 8.8),
+(73, 73, 73, 1, 20.0, 11.0, 75, 6.5, 8.6),
+(74, 74, 74, 2, 22.0, 12.0, 60, 7.5, 8.7),
+(75, 75, 75, 3, 18.0, 10.0, 90, 6.0, 8.5),
+(76, 76, 76, 4, 20.0, 11.0, 60, 6.5, 8.6),
+(77, 77, 77, 1, 22.0, 12.0, 45, 7.5, 8.7),
+(78, 78, 78, 2, 18.0, 10.0, 75, 6.0, 8.5),
+(79, 79, 79, 3, 15.0, 8.0, 90, 5.0, 8.4),
+(80, 80, 80, 4, 18.0, 10.0, 75, 6.0, 8.5),
+
+-- 2022 Movies (10)
+(81, 81, 81, 1, 40.0, 25.0, 30, 20.0, 9.8),
+(82, 82, 82, 2, 25.0, 14.0, 60, 8.0, 8.8),
+(83, 83, 83, 3, 30.0, 18.0, 45, 10.0, 9.0),
+(84, 84, 84, 4, 22.0, 12.0, 60, 7.5, 8.7),
+(85, 85, 85, 1, 20.0, 11.0, 75, 6.5, 8.6),
+(86, 86, 86, 2, 25.0, 14.0, 60, 8.0, 8.8),
+(87, 87, 87, 3, 18.0, 10.0, 90, 6.0, 8.5),
+(88, 88, 88, 4, 20.0, 11.0, 60, 6.5, 8.6),
+(89, 89, 89, 1, 22.0, 12.0, 45, 7.5, 8.7),
+(90, 90, 90, 2, 18.0, 10.0, 75, 6.0, 8.5),
+
+-- 2023 Movies (10)
+(91, 91, 91, 3, 25.0, 14.0, 60, 8.0, 8.8),
+(92, 92, 92, 4, 30.0, 18.0, 45, 10.0, 9.0),
+(93, 93, 93, 1, 22.0, 12.0, 60, 7.5, 8.7),
+(94, 94, 94, 2, 20.0, 11.0, 75, 6.5, 8.6),
+(95, 95, 95, 3, 25.0, 14.0, 60, 8.0, 8.8),
+(96, 96, 96, 4, 18.0, 10.0, 90, 6.0, 8.5),
+(97, 97, 97, 1, 20.0, 11.0, 60, 6.5, 8.6),
+(98, 98, 98, 2, 22.0, 12.0, 45, 7.5, 8.7),
+(99, 99, 99, 3, 18.0, 10.0, 75, 6.0, 8.5),
+(100, 100, 100, 4, 35.0, 20.0, 45, 15.0, 9.5),
+
+-- 2024 Movies (4)
+(101, 101, 101, 1, 30.0, 18.0, 60, 10.0, 9.0),
+(102, 102, 102, 2, 25.0, 14.0, 75, 8.0, 8.8),
+(103, 103, 103, 3, 22.0, 12.0, 60, 7.5, 8.7),
+(104, 104, 104, 4, 20.0, 11.0, 90, 6.5, 8.6);
+
+
+Select * from Artist_Dim;
+Select * from ArtistSuccess_Dim;
+Select * from BoxOffice_Fact;
+Select * from Date_Dim;
+Select * from Distributor_Dim;
+Select * from Movie_Dim;
+Select * from OTTPerformance_Fact;
+Select * from Platform_Dim;
