@@ -1,0 +1,214 @@
+--Star Schema
+
+--Roll-Up:
+--"Write an MDX query to find the total revenue, marketing cost, production cost, and days in theaters for movies, aggregated by year."
+
+SELECT 
+    NON EMPTY {[Measures].[Days In Theaters],[Measures].[Total Revenue],[Measures].[Marketing Cost],[Measures].[Production Cost]} ON COLUMNS, 
+    NON EMPTY [Date Dim].[Year].Members ON ROWS
+FROM [Star scheama];
+--before Roll-UP
+SELECT 
+    NON EMPTY {[Measures].[Days In Theaters], [Measures].[Total Revenue], [Measures].[Marketing Cost], [Measures].[Production Cost]} ON COLUMNS, 
+    NON EMPTY {[Date Dim].[Year].Children*[Date Dim].[Month].Children} ON ROWS
+FROM [Star scheama];
+
+
+
+
+--Drill-Down:
+--"Write an MDX query to find the total revenue, marketing cost, and theater count for movies broken down by year and month."
+
+SELECT 
+    NON EMPTY {[Measures].[Total Revenue],[Measures].[Marketing Cost],[Measures].[Theater Count]} ON COLUMNS, 
+    NON EMPTY {[Date Dim].[Year].Children*[Date Dim].[Month].Children} ON ROWS
+FROM [Star scheama];
+
+--before drill down
+SELECT 
+    NON EMPTY {[Measures].[Total Revenue], [Measures].[Marketing Cost], [Measures].[Theater Count]} ON COLUMNS, 
+    NON EMPTY {[Date Dim].[Year].Children} ON ROWS
+FROM [Star scheama];
+
+
+
+--Dice:
+--"Write an MDX query to find the total revenue of movies that have a 'UA' censor rating and were released in 2023."
+
+SELECT 
+    NON EMPTY [Measures].[Total Revenue] ON COLUMNS, 
+    NON EMPTY [Movie Dim].[Title].Members ON ROWS
+FROM [Star scheama]
+WHERE (
+    [Movie Dim].[Censor Rating].&[UA], 
+    [Date Dim].[Year].&[2023]
+);
+
+
+
+
+--Slice:
+--"Write an MDX query to find the total revenue of movies that have a 'U' censor rating, broken down by artist."
+
+SELECT 
+    NON EMPTY {[Measures].[Total Revenue]} ON COLUMNS ,
+	NON EMPTY {[Artist Dim].[Name].Members} ON ROWS
+FROM [Star scheama]
+WHERE ([Movie Dim].[Censor Rating].&[U]);
+
+--Pivot:
+--"Write an MDX query to compare total revenue of movies across different years, categorized by artists."
+
+SELECT 
+    NON EMPTY {[Date Dim].[Year].Members} ON COLUMNS, 
+    NON EMPTY {[Artist Dim].[Name].Members} ON ROWS
+FROM [Star scheama];
+
+
+
+--Snowflack schema
+
+--Roll-Up:
+--"Write an MDX query to find the total revenue, marketing cost, production cost, theater count, and days in theaters for movies, aggregated by year."
+
+SELECT 
+    NON EMPTY {[Measures].[Days In Theaters],[Measures].[Total Revenue],[Measures].[Marketing Cost],[Measures].[Production Cost],[Measures].[Theater Count]} ON COLUMNS, 
+    NON EMPTY [Date Dim 1].[Year].Members ON ROWS
+FROM [Snowflack Scheama];
+
+--before roll up
+SELECT 
+    NON EMPTY {
+        [Measures].[Days In Theaters],
+        [Measures].[Total Revenue],
+        [Measures].[Marketing Cost],
+        [Measures].[Production Cost],
+        [Measures].[Theater Count]
+    } ON COLUMNS, 
+    NON EMPTY {[Date Dim 1].[Year].Children*[Date Dim 1].[Full Date].Children} ON ROWS
+FROM [Snowflack Scheama];
+
+
+--Drill-Down:
+--"Write an MDX query to find the total revenue, marketing cost, and theater count for movies broken down by year, quarter, and month."
+
+SELECT 
+    NON EMPTY {[Measures].[Total Revenue],[Measures].[Marketing Cost],[Measures].[Theater Count]} ON COLUMNS, 
+    NON EMPTY {[Date Dim 1].[Year].Children*[Date Dim 1].[Quarter].Children*[Date Dim 1].[Month].Children} ON ROWS
+FROM [Snowflack scheama];
+
+--before drill down
+SELECT 
+    NON EMPTY {[Measures].[Total Revenue],[Measures].[Marketing Cost],[Measures].[Theater Count]} ON COLUMNS, 
+    NON EMPTY {[Date Dim 1].[Year].Children} ON ROWS
+FROM [Snowflack scheama];
+
+
+--Dice:
+--"Write an MDX query to find the total revenue of movies with a 'U' censor rating released in 2023, filtered by distributors with Pan-India coverage.
+
+SELECT 
+    NON EMPTY [Measures].[Total Revenue] ON COLUMNS, 
+    NON EMPTY [Distributor Dim 1].[Region Coverage].[Pan-India] ON ROWS
+FROM [Snowflack Scheama]
+WHERE (
+    [Movie Dim 1].[Censor Rating].&[U], 
+    [Date Dim 1].[Year].&[2023]
+);
+
+--Slice:
+--"Write an MDX query to find the total revenue of movies with a 'UA' censor rating, categorized by movie titles."
+
+SELECT 
+    NON EMPTY [Measures].[Total Revenue] ON COLUMNS,
+	NON EMPTY [Movie Dim 1].[Title].Members ON ROWS
+	
+FROM [Snowflack Scheama]
+WHERE ([Movie Dim 1].[Censor Rating].&[UA]);
+
+--Pivot:
+--"Write an MDX query compare total revenue across different movie titles for films with a 'UA' censor rating."
+
+SELECT 
+   	NON EMPTY [Movie Dim 1].[Title].Members ON COLUMNS,
+	NON EMPTY [Measures].[Total Revenue] ON ROWS
+	
+FROM [Snowflack Scheama]
+WHERE ([Movie Dim 1].[Censor Rating].&[UA]);
+
+
+
+--Fact constellation
+
+
+--Roll-Up:
+--"Write an MDX query to find the OTT revenue share, OTT viewership, and platform exclusivity fees, aggregated by year."
+
+SELECT 
+	NON EMPTY {[Measures].[OTT Revenue Share],[Measures].[OTT Viewership],[Measures].[Platform Exclusivity Fee]} ON COLUMNS,
+	NON EMPTY {[Date Dim 2].[Year].Members} ON ROWS
+FROM [Fact constellation];
+
+--before roll up
+SELECT 
+	NON EMPTY {[Measures].[OTT Revenue Share],[Measures].[OTT Viewership],[Measures].[Platform Exclusivity Fee]} ON COLUMNS,
+	NON EMPTY{[Date Dim 2].[Year].Children*[Date Dim 2].[Season].Children} ON ROWS
+FROM [Fact constellation];
+
+--Drill-Down:
+--"Write an MDX query to find the OTT revenue share, OTT viewership, and platform exclusivity fees, broken down by year, quarter, and season."
+
+SELECT 
+	NON EMPTY {[Measures].[OTT Revenue Share],[Measures].[OTT Viewership],[Measures].[Platform Exclusivity Fee]} ON COLUMNS,
+	NON EMPTY {[Date Dim 2].[Year].Children*[Date Dim 2].[Quarter].Children*[Date Dim 2].[Season].Children} ON ROWS
+FROM [Fact constellation];
+
+-- before drill down
+SELECT 
+	NON EMPTY {[Measures].[OTT Revenue Share],[Measures].[OTT Viewership],[Measures].[Platform Exclusivity Fee]} ON COLUMNS,
+	NON EMPTY{[Date Dim 2].[Year].Children}ON ROWS
+FROM [Fact constellation];
+
+--Dice:
+--"Write an MDX query to find the OTT revenue share, OTT viewership, and platform exclusivity fees for movies with a 'U' censor rating released in 2021, categorized by streaming platforms."
+
+SELECT 
+	NON EMPTY {[Measures].[OTT Revenue Share],[Measures].[OTT Viewership],[Measures].[Platform Exclusivity Fee]} ON COLUMNS,
+	NON EMPTY [Platform Dim].[Platform Name].Members ON ROWS
+FROM [Fact constellation]
+WHERE (
+    [Movie Dim 2].[Censor Rating].&[U], 
+    [Date Dim 2].[Year].&[2021]
+);
+
+--Slice:
+--"Write an MDX query to find the OTT revenue share, OTT viewership, and platform exclusivity fees for movies with a 'UA' censor rating, categorized by movie titles."
+
+SELECT 
+	NON EMPTY {[Measures].[OTT Revenue Share],[Measures].[OTT Viewership],[Measures].[Platform Exclusivity Fee]} ON COLUMNS,
+	NON EMPTY [Movie Dim 2].[Title].Members ON ROWS
+	
+FROM [Fact constellation]
+WHERE ([Movie Dim 2].[Censor Rating].&[UA]);
+
+--Pivot:
+--"Write an MDX query compare OTT revenue share, OTT viewership, and platform exclusivity fees across different movie titles for films with a 'UA' censor rating."
+
+SELECT 
+	NON EMPTY {[Measures].[OTT Revenue Share],[Measures].[OTT Viewership],[Measures].[Platform Exclusivity Fee]} ON ROWS,
+	NON EMPTY [Movie Dim 2].[Title].Members ON COLUMNS
+	
+	
+FROM [Fact constellation]
+WHERE ([Movie Dim 2].[Censor Rating].&[UA]);
+
+
+
+
+
+
+
+
+
+
+
